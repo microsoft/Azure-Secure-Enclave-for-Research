@@ -1,0 +1,48 @@
+name: Build ARM Template
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout from push
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/checkout@v3
+
+      # In case of a pull request, need to check out the branch
+      # the PR is coming from, not the PR itself.
+      - name: Checkout from PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      # - name: Install Bicep build
+      #   run: |
+      #     curl -Lo bicepinstall https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+      #     chmod +x ./bicepinstall
+      #     sudo mv ./bicepinstall /usr/local/bin/bicep
+      #     bicep --version
+
+      - name: Run Bicep build
+        run: |
+          bicep build Bicep/root_modules/main.bicep --outfile arm_templates/azuredeploy.json
+
+      - name: Commit compiled ARM template
+        uses: EndBug/add-and-commit@v9.0.1
+        with:
+          author_name: github-actions
+          author_email: "dcampman@users.noreply.github.com"
+          message: "Github Action: Update ARM template from Bicep"
+          add: arm_templates/azuredeploy.json

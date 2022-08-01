@@ -1,0 +1,494 @@
+{
+	"handler": "Microsoft.Azure.CreateUIDef",
+	"version": "0.1.2-preview",
+	"parameters": {
+		"config": {
+			"isWizard": false,
+			"basics": {
+				"description": "Deploys a Secure Research Environment with approval workflows for export of the data.",
+				"subscription": {
+					"constraints": {
+						"validations": [
+							{
+								"isValid": "[not(contains(subscription().displayName, 'HUB'))]",
+								"message": "You shouldn't use a hub subscription to deploy a research enclave."
+							},
+							{
+								"permission": "Microsoft.ContainerInstance/containerGroups/*",
+								"message": "Must have write permission to create a Container Instance."
+							},
+							{
+								"permission": "Microsoft.Resources/deployments/*",
+								"message": "Must have write permission to deploy resources."
+							},
+							{
+								"permission": "Microsoft.Resources/deploymentScripts/*",
+								"message": "Must have permission to run deployment scripts."
+							}
+						]
+					},
+					"resourceProviders": [
+						"Microsoft.DataFactory",
+						"microsoft.insights",
+						"Microsoft.ManagedIdentity",
+						"Microsoft.ContainerInstance",
+						"Microsoft.Logic",
+						"Microsoft.Management",
+						"Microsoft.ApiManagement",
+						"Microsoft.Storage",
+						"Microsoft.DesktopVirtualization",
+						"Microsoft.EventGrid",
+						"Microsoft.OperationalInsights",
+						"Microsoft.Web",
+						"Microsoft.Compute",
+						"Microsoft.Network",
+						"Microsoft.ResourceGraph",
+						"Microsoft.Resources"
+					]
+				},
+				"location": {
+					"label": "Location",
+					"toolTip": "Azure Region for this deployment",
+					"resourceTypes": [
+						"Microsoft.Compute/virtualMachines"
+					],
+					"allowedValues": [
+						"CentralUS",
+						"EastUS",
+						"EastUS2",
+						"NorthCentralUS",
+						"SouthCentralUS",
+						"WestCentralUS",
+						"WestUS",
+						"WestUS2",
+						"WestUS3"
+					]
+				}
+			}
+		},
+		"basics": [
+			{
+				"name": "environment",
+				"type": "Microsoft.Common.DropDown",
+				"label": "Environment",
+				"defaultValue": "Production",
+				"toolTip": "The environment designator will be used to create resource names.",
+				"constraints": {
+					"required": true,
+					"allowedValues": [
+						{
+							"label": "Development",
+							"value": "dev"
+						},
+						{
+							"label": "Test",
+							"value": "tst"
+						},
+						{
+							"label": "Production",
+							"value": "prd"
+						},
+						{
+							"label": "Sandbox",
+							"value": "box"
+						},
+						{
+							"label": "Staging",
+							"value": "stg"
+						},
+						{
+							"label": "Shared",
+							"value": "shared"
+						},
+						{
+							"label": "UAT",
+							"value": "uat"
+						}
+					]
+				},
+				"visible": true
+			},
+			{
+				"name": "loggingConfig",
+				"type": "Microsoft.Common.Section",
+				"label": "Configure Diagnostics Logging",
+				"elements": [
+					{
+						"name": "newOrExistingLogAnalytics",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Log Analytics Workspace",
+						"defaultValue": "New",
+						"toolTip": "Choose 'New' to create a new Log Analytics Workspace or 'Existing' to choose an existing Log Analytics Workspace. All resource diagnostics logs and metrics will be configured to this log analytics workspace.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "New",
+									"value": false
+								},
+								{
+									"label": "Existing",
+									"value": true
+								}
+							],
+							"required": true
+						},
+						"visible": true
+					},
+					{
+						"name": "logAnalyticsSelector",
+						"type": "Microsoft.Solutions.ResourceSelector",
+						"label": "Existing Log Anlytics Workspace",
+						"resourceType": "Microsoft.OperationalInsights/workspaces",
+						"options": {
+							"filter": {
+								"subscription": "all",
+								"location": "all"
+							}
+						},
+						"visible": "[basics('loggingConfig').newOrExistingLogAnalytics]"
+					}
+				]
+			}
+		],
+		"steps": [
+			{
+				"name": "workspaceConfig",
+				"label": "Research Workspace",
+				"elements": [
+					{
+						"name": "workspaceSection",
+						"type": "Microsoft.Common.Section",
+						"label": "Configure Workspace Properties",
+						"elements": [
+							{
+								"name": "workspaceName",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Workspace Name",
+								"defaultValue": "",
+								"toolTip": "Name of the workspace to include in the naming of resources. This value will be truncated to 6 characters in resource names but the full value will be present in tags on resources.",
+								"constraints": {
+									"required": true,
+									"regex": "",
+									"validationMessage": ""
+								},
+								"visible": true
+							},
+							{
+								"name": "instance",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Instance of Workspace",
+								"defaultValue": "1",
+								"toolTip": "Instance suffix for resources. Presented as two digits in the naming convention.",
+								"constraints": {
+									"required": false,
+									"regex": "^\\d{1,2}$",
+									"validationMessage": ""
+								},
+								"visible": true
+							}
+						]
+					},
+					{
+						"name": "networkingSection",
+						"type": "Microsoft.Common.Section",
+						"label": "Virtual Network Configuration",
+						"elements": [
+							{
+								"name": "newOrExistingVnet",
+								"type": "Microsoft.Common.OptionsGroup",
+								"label": "New or Existing Virtual Network",
+								"defaultValue": "New",
+								"toolTip": "Choose 'New' to create a new virtual network or 'Existing' to choose an existing virtual network.",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "New",
+											"value": false
+										},
+										{
+											"label": "Existing",
+											"value": true
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "vnetSelector",
+								"type": "Microsoft.Solutions.ResourceSelector",
+								"label": "Existing Virtual Network",
+								"resourceType": "Microsoft.Network/virtualNetworks",
+								"options": {
+									"filter": {
+										"subscription": "onBasics",
+										"location": "onBasics"
+									}
+								},
+								"visible": "[steps('workspaceConfig').networkingSection.newOrExistingVnet]"
+							},
+							{
+								"name": "subnetsApi",
+								"type": "Microsoft.Solutions.ArmApiControl",
+								"request": {
+									"method": "GET",
+									"path": "[concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/?api-version=2021-05-01')]"
+								}
+							},
+							{
+								"name": "privateEndpointSubnetDropDown",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Private Endpoint Subnet",
+								"toolTip": "This subnet will be used for the secured storage account's private endpoints.",
+								"constraints": {
+									"allowedValues": "[map(steps('workspaceConfig').networkingSection.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+									"required": "[steps('workspaceConfig').networkingSection.newOrExistingVnet]"
+								},
+								"visible": "[steps('workspaceConfig').networkingSection.newOrExistingVnet]"
+							},
+							{
+								"name": "peerToHub",
+								"type": "Microsoft.Common.OptionsGroup",
+								"label": "Peer to an existing HUB?",
+								"defaultValue": "No",
+								"toolTip": "Will the workspace virtual network need to be peered with an existing hub virtual network? If so, you will need to manage NSG rules and specific routes on the resources deployed from this template. If this option is not selected, a default NSG rule will be placed on all NSGs to limit internet access.",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "No",
+											"value": false
+										},
+										{
+											"label": "Yes",
+											"value": true
+										}
+									],
+									"required": true
+								},
+								"visible": "[not(steps('workspaceConfig').networkingSection.newOrExistingVnet)]"
+							},
+							{
+								"name": "hubVnetSelector",
+								"type": "Microsoft.Solutions.ResourceSelector",
+								"label": "Hub Virtual Network",
+								"resourceType": "Microsoft.Network/virtualNetworks",
+								"options": {
+									"filter": {
+										"location": "all",
+										"subscription": "all"
+									}
+								},
+								"visible": "[steps('workspaceConfig').networkingSection.peerToHub]"
+							},
+							{
+								"name": "defaultRouteNextHop",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Next Hop IP Address",
+								"defaultValue": "",
+								"toolTip": "Optional 'next hop' address for default 0.0.0.0/0 rule on all route tables. If you intend to manage routing separately, do not fill in this parameter.",
+								"constraints": {
+									"required": false,
+									"regex": "",
+									"validationMessage": ""
+								},
+								"visible": "[and(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.peerToHub)]"
+							}
+						]
+					},
+					{
+						"name": "storageSection",
+						"type": "Microsoft.Common.Section",
+						"label": "Secured Storage Configuration",
+						"elements": [
+							{
+								"name": "newOrExistingStorage",
+								"type": "Microsoft.Common.OptionsGroup",
+								"label": "New or Existing Secured Storage",
+								"defaultValue": "New",
+								"toolTip": "Choose 'New' to create a new privatatized storage account or 'Existing' to choose an existing storage account.",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "New",
+											"value": false
+										},
+										{
+											"label": "Existing",
+											"value": true
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "storageSelector",
+								"type": "Microsoft.Solutions.ResourceSelector",
+								"label": "Existing Storage Account",
+								"resourceType": "Microsoft.Storage/storageAccounts",
+								"options": {
+									"filter": {
+										"subscription": "onBasics",
+										"location": "onBasics"
+									}
+								},
+								"visible": "[steps('workspaceConfig').storageSection.newOrExistingStorage]"
+							}
+						]
+					},
+					{
+						"name": "remoteAccessSection",
+						"type": "Microsoft.Common.Section",
+						"label": "Configure Remote Access",
+						"elements": [
+							{
+								"name": "avdAccess",
+								"type": "Microsoft.Common.OptionsGroup",
+								"label": "Add Azure Virtual Desktop to access the enclave.",
+								"defaultValue": "No",
+								"toolTip": "",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Yes",
+											"value": true
+										},
+										{
+											"label": "No",
+											"value": false
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "vmCount",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Number of Instances",
+								"defaultValue": "",
+								"toolTip": "The number entered into this box will decide how many session hosts will be created.",
+								"constraints": {
+									"required": true,
+									"regex": "^\\d{1,2}$",
+									"validationMessage": ""
+								},
+								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+							},
+							{
+								"name": "vmSizesApi",
+								"type": "Microsoft.Solutions.ArmApiControl",
+								"request": {
+									"method": "GET",
+									"path": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Compute/locations/', location(), '/vmSizes?api-version=2021-11-01')]"
+								}
+							},
+							{
+								"name": "vmSizeSelector",
+								"type": "Microsoft.Compute.SizeSelector",
+								"label": "Session Host Size",
+								"toolTip": "Choose the size for the ",
+								"recommendedSizes": [
+									"Standard_D3"
+								],
+								"constraints": {
+									"allowedSizes": "[map(steps('workspaceConfig').remoteAccessSection.vmSizesApi.value, (item) => item.name)]",
+									"excludedSizes": []
+								},
+								"options": {
+									"hideDiskTypeFilter": false
+								},
+								"osPlatform": "Windows",
+								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+							},
+							{
+								"name": "computeSubnetDropDown",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Session Host Subnet",
+								"toolTip": "This subnet will be used for the remote desktop session hosts for AVD.",
+								"constraints": {
+									"allowedValues": "[map(steps('workspaceConfig').networkingSection.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+									"required": true
+								},
+								"visible": "[and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet)]"
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "dataAutomationConfig",
+				"label": "Data Automation Configuration",
+				"elements": [
+					{
+						"name": "dataAutomationSection",
+						"type": "Microsoft.Common.Section",
+						"label": "Data Export Process Approver",
+						"elements": [
+							{
+								"name": "approverEmail",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Approver Email",
+								"defaultValue": "",
+								"toolTip": "Email address of the appover responsible for validating exported data is ready to be released.",
+								"constraints": {
+									"required": true,
+									"regex": "[a-z0-9!#$%&'*+/=?^_'{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_'{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+									"validationMessage": ""
+								},
+								"visible": true
+							}
+						]
+					},
+					{
+						"name": "identity",
+						"type": "Microsoft.ManagedIdentity.IdentitySelector",
+						"label": "Managed Identity Configuration",
+						"toolTip": {
+							"userAssignedIdentity": "Select an **existing** user assigned identity required for data processing automation. This identity must be assigned 'Storage Account Contributor' and 'Data Factory Contributor' scoped at the resource group level or higher, where the data automation resources are deployed."
+						},
+						"defaultValue": {
+							"systemAssignedIdentity": "Off"
+						},
+						"options": {
+							"hideSystemAssignedIdentity": true,
+							"hideUserAssignedIdentity": false
+						},
+						"visible": true
+					}
+				]
+			},
+			{
+				"name": "tags",
+				"label": "Tags",
+				"elements": [
+					{
+						"name": "tags",
+						"type": "Microsoft.Common.TagsByResource",
+						"resources": [
+							"All_Resources"
+						]
+					}
+				]
+			}
+		],
+		"outputs": {
+			"environment": "[basics('environment')]",
+			"workspaceName": "[steps('workspaceConfig').workspaceSection.workspaceName]",
+			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
+			"avdAccess": "[steps('workspaceConfig').remoteAccessSection.avdAccess]",
+			"rdshVmSize": "[steps('workspaceConfig').remoteAccessSection.vmSizeSelector]",
+			"vmCount": "[steps('workspaceConfig').remoteAccessSection.vmCount]",
+			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
+			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
+			"hubVirtualNetworkId": "[if(and(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.peerToHub), steps('workspaceConfig').networkingSection.hubVnetSelector.id, '')]",
+			"defaultRouteNextHop": "[steps('workspaceConfig').networkingSection.defaultRouteNextHop]",
+			"computeSubnetId": "[if(and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet), concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').remoteAccessSection.computeSubnetDropDown), '')]",
+			"privateEndpointSubnetId": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').networkingSection.privateEndpointSubnetDropDown), '')]",
+			"PrivateStorage": "[if(steps('workspaceConfig').storageSection.newOrExistingStorage, steps('workspaceConfig').storageSection.storageSelector, parse('{}'))]",
+			"LogAnalytics": "[if(basics('loggingConfig').newOrExistingLogAnalytics, basics('loggingConfig').logAnalyticsSelector, parse('{}'))]",
+			"userAssignedManagedIdentity": "[if(empty(steps('dataAutomationConfig').identity), steps('dataAutomationConfig').identity, parse('{}'))]",
+			"tags": "[steps('tags').tags.All_Resources]"
+		}
+	}
+}
