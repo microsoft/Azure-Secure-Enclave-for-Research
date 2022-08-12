@@ -4,6 +4,10 @@ param avdSubnetId string
 param rdshVmSize string
 param hostPoolRegistrationToken string
 param hostPoolName string
+
+@secure()
+param vmAdministratorAccountPassword string
+
 param vmCount int = 1
 param deploymentNameStructure string = '{rtype}-${utcNow()}'
 param tags object = {}
@@ -12,7 +16,7 @@ param tags object = {}
 var nestedTemplatesLocation = 'https://wvdportalstorageblob.blob.${environment().suffixes.storage}/galleryartifacts/armtemplates/Hostpool_12-9-2021/nestedTemplates/'
 var vmTemplateUri = '${nestedTemplatesLocation}managedDisks-galleryvm.json'
 
-// Create availability set
+// Create a new availability set
 resource availabilitySet 'Microsoft.Compute/availabilitySets@2021-11-01' = {
   name: '${rdshPrefix}-avail'
   location: location
@@ -76,7 +80,7 @@ resource vmDeployment 'Microsoft.Resources/deployments@2021-04-01' = {
         value: 'AzureUser'
       }
       vmAdministratorAccountPassword: {
-        value: 'Test1234'
+        value: vmAdministratorAccountPassword
       }
       administratorAccountUsername: {
         value: ''

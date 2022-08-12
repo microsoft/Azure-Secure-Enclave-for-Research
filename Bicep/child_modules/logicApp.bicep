@@ -1,10 +1,11 @@
 param location string
 param namingStructure string
-param subwloadname string = ''
 param adfName string
 param pipelineName string
 param storageAcctName string
 param approverEmail string
+
+param subwloadname string = ''
 param tags object = {}
 
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')

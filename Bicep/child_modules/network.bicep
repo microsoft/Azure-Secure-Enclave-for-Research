@@ -1,9 +1,10 @@
 param location string
 param namingStructure string
-param subwloadname string = ''
 param addressPrefixes array
-param dnsServers array = []
 param subnets object
+
+param subwloadname string = ''
+param dnsServers array = []
 param nsgSecurityRules array = []
 param defaultRouteNextHop string = ''
 param hubVirtualNetworkId string = ''
@@ -12,8 +13,8 @@ param tags object = {}
 var customDNS = !empty(dnsServers)
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')
 
-// create vnet
-resource virtual_network 'Microsoft.Network/virtualNetworks@2021-05-01' = {
+// Create a Virtual Network
+resource vNet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: replace(baseName, '{rtype}', 'vnet')
   location: location
   properties: {
@@ -40,7 +41,7 @@ resource virtual_network 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   tags: tags
 }
 
-// create nsgs
+// Create a network security group for each subnet
 resource networkSecurityGroups 'Microsoft.Network/networkSecurityGroups@2021-05-01' = [for s in items(subnets): {
   name: 'nsg-${s.value.name}'
   location: location
@@ -50,7 +51,7 @@ resource networkSecurityGroups 'Microsoft.Network/networkSecurityGroups@2021-05-
   tags: tags
 }]
 
-// create route tables
+// Create a route table for each subnet
 resource routeTables 'Microsoft.Network/routeTables@2021-05-01' = [for s in items(subnets): {
   name: 'rt-${s.value.name}'
   location: location
@@ -70,9 +71,10 @@ resource routeTables 'Microsoft.Network/routeTables@2021-05-01' = [for s in item
   tags: tags
 }]
 
+// Peer the new VNet to a hub VNet, if specified
 resource peerToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01' = if (!empty(hubVirtualNetworkId)) {
-  name: '${virtual_network.name}-to-${last(split(hubVirtualNetworkId, '/'))}'
-  parent: virtual_network
+  name: '${vNet.name}-to-${last(split(hubVirtualNetworkId, '/'))}'
+  parent: vNet
   properties: {
     allowForwardedTraffic: true
     allowGatewayTransit: false
@@ -84,14 +86,16 @@ resource peerToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
   }
 }
 
+// Retrieve the newly created subnets to enable returning their resource IDs
 resource pepSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' existing = {
-  name: '${virtual_network.name}/${subnets['privateEndpoints'].name}'
+  name: '${vNet.name}/${subnets.privateEndpoints.name}'
 }
 
 resource workloadSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' existing = {
-  name: '${virtual_network.name}/${subnets['workload'].name}'
+  name: '${vNet.name}/${subnets.workload.name}'
 }
 
-output vnetId string = virtual_network.id
+output vnetId string = vNet.id
+// TODO: return as custom object or array instead
 output pepSubnetId string = pepSubnet.id
 output workloadSubnetId string = workloadSubnet.id

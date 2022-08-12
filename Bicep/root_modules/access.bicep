@@ -2,12 +2,16 @@ targetScope = 'subscription'
 
 param location string
 param namingStructure string
-param subwloadname string = ''
 param deploymentNameStructure string
 param avdSubnetId string
 param rdshVmSize string
 param rdshPrefix string
 param vmCount int
+
+@secure()
+param vmAdministratorAccountPassword string
+
+param subwloadname string = ''
 param tags object = {}
 
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')
@@ -19,6 +23,7 @@ resource avdResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
+// Create the AVD infrastructure resources
 module avd '../child_modules/avd.bicep' = {
   name: replace(deploymentNameStructure, '{rtype}', 'avd')
   scope: avdResourceGroup
@@ -29,6 +34,7 @@ module avd '../child_modules/avd.bicep' = {
   }
 }
 
+// Create the AVD session hosts
 module avdCompute '../child_modules/avdCompute.bicep' = {
   name: replace(deploymentNameStructure, '{rtype}', 'avdvm-vms')
   scope: avdResourceGroup
@@ -42,5 +48,6 @@ module avdCompute '../child_modules/avdCompute.bicep' = {
     hostPoolName: avd.outputs.hostpoolName
     avdSubnetId: avdSubnetId
     tags: tags
+    vmAdministratorAccountPassword: vmAdministratorAccountPassword
   }
 }

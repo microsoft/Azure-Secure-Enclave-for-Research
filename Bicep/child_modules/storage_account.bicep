@@ -2,6 +2,7 @@ param location string
 param namingStructure string
 param subwloadname string
 param containerNames array
+
 param skuName string = 'Standard_LRS'
 param privatize bool = false
 param vnetId string = ''
@@ -14,6 +15,7 @@ var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}',
 var stgNameClean = take(replace(guid(subscription().id, resourceGroup().id, baseName), '-', ''), 22)
 var endpoint = 'privatelink.blob.${environment().suffixes.storage}'
 
+// Create a new storage account
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   name: 'st${stgNameClean}'
   location: location
@@ -50,11 +52,13 @@ resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2021-06-01
   }
 }
 
+// Create default containers
 resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-06-01' = [for c in containerNames: {
   parent: blobServices
   name: c
 }]
 
+// Create a private endpoint if the storage account is secured (private)
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-03-01' = if (privatize) {
   name: replace(baseName, '{rtype}', 'pep')
   location: location
@@ -77,6 +81,7 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-03-01' = if (p
   }
 }
 
+// Create a DNS zone for the the private endpoint's A record
 resource privatelink_blob_core_windows_net 'Microsoft.Network/privateDnsZones@2018-09-01' = if (privatize) {
   name: endpoint
   location: 'global'
@@ -84,6 +89,7 @@ resource privatelink_blob_core_windows_net 'Microsoft.Network/privateDnsZones@20
   tags: tags
 }
 
+// Create the default group in the DNS zone
 resource privateEndpointDNSGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = if (privatize) {
   name: '${privateEndpoint.name}/default'
   properties: {
@@ -98,6 +104,7 @@ resource privateEndpointDNSGroup 'Microsoft.Network/privateEndpoints/privateDnsZ
   }
 }
 
+// Link the project's virtual network to the new DNS zone
 resource privatelink_blob_core_windows_net_virtualNetworkId 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = if (privatize) {
   name: '${endpoint}/${uniqueString(vnetId)}'
   location: 'global'
@@ -112,13 +119,13 @@ resource privatelink_blob_core_windows_net_virtualNetworkId 'Microsoft.Network/p
   ]
 }
 
-// Assign Storage Blob data contrib to principalId if sent to this module
-resource rbacAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = [for i in principalIds: if (assignRole) {
-  name: guid('rbac-${storageAccount.name}-${i}')
+// Assign the 'Storage Blob Data Contributor' RBAC role to principalId if sent to this module
+resource rbacAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = [for principalId in principalIds: if (assignRole) {
+  name: guid('rbac-${storageAccount.name}-${principalId}')
   scope: storageAccount
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
-    principalId: i
+    principalId: principalId
     principalType: 'ServicePrincipal'
   }
 }]

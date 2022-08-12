@@ -1,6 +1,7 @@
 param namingStructure string
-param subwloadname string = ''
 param location string
+
+param subwloadname string = ''
 param tags object = {}
 
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')

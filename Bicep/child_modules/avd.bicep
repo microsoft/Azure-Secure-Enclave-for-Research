@@ -7,7 +7,7 @@ param tags object = {}
 
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')
 
-// create hostpool for avd VMs
+// Create a host pool for AVD
 resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-09-03-preview' = {
   name: replace(baseName, '{rtype}', 'hp')
   location: location
@@ -27,7 +27,7 @@ resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-09-03-preview'
   tags: tags
 }
 
-// setup remote application group for remote apps
+// Setup remote application group for remote apps
 resource applicationGroup 'Microsoft.DesktopVirtualization/applicationGroups@2021-09-03-preview' = {
   name: replace(baseName, '{rtype}', 'ag')
   location: location
@@ -38,7 +38,7 @@ resource applicationGroup 'Microsoft.DesktopVirtualization/applicationGroups@202
   tags: tags
 }
 
-// setup rdp as remote app in app group
+// Setup RDP as a remote app in the app group
 resource app 'Microsoft.DesktopVirtualization/applicationGroups/applications@2021-09-03-preview' = {
   name: 'Remote Desktop'
   parent: applicationGroup
@@ -53,7 +53,7 @@ resource app 'Microsoft.DesktopVirtualization/applicationGroups/applications@202
   }
 }
 
-// create workspace for AVD app groups
+// Create an AVD workspace
 resource workspace 'Microsoft.DesktopVirtualization/workspaces@2021-09-03-preview' = {
   name: replace(baseName, '{rtype}', 'ws')
   location: location

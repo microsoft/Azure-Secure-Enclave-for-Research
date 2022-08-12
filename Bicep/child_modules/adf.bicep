@@ -169,3 +169,4 @@ resource adfPrivateStgRole 'Microsoft.Authorization/roleAssignments@2020-10-01-p
 
 output principalId string = adf.identity.principalId
 output name string = adf.name
+output managedVNetName string = managedVnet.name

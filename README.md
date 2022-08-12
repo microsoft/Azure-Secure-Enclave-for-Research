@@ -16,7 +16,7 @@ This solution was created in collaboration with the University of Pittsburgh.
 
 This repository contains a set of Bicep templates which will deploy a complete SRE solution in a parameterized fashion. You can either download the Bicep templates and execute them using the *deploy.ps1* PowerShell script or simply use the "Deploy to Azure" button on this page.
 
-[![Deploy To Azure](https://docs.microsoft.com/azure/templates/media/deploy-to-azure.svg)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2FAzure-SRE%2Fmain%2Farm_templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2FAzure-SRE%2Fmain%2Farm_templates%2FmainUiDefinition.json)
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2FAzure-SRE%2Fmain%2Farm_templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoft%2FAzure-SRE%2Fmain%2Farm_templates%2FmainUiDefinition.json)
 
 To help you with the process of deploying research environments, refer to the ["Secure Research" Azure DevOps Generator](https://azuredevopsdemogenerator.azurewebsites.net/?name=secresearch) template. This Azure DevOps template contains Azure Boards work items to guide you through the design decisions and deployment of a complete research environment.
 

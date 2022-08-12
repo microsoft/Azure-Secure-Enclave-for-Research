@@ -1,9 +1,10 @@
 param location string
 param namingStructure string
-param subwloadname string = ''
 param arguments string
 param scriptContent string
 param userAssignedIdentityId string
+
+param subwloadname string = ''
 param tags object = {}
 param currentTime string = utcNow()
 

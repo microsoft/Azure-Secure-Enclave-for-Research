@@ -17,7 +17,10 @@ param approverEmail string
 param sequence int = 1
 param tags object = {}
 
-// optional parameters
+@secure()
+param vmAdministratorAccountPassword string
+
+// Optional parameters
 param avdAccess bool = false
 param rdshVmSize string = 'Standard_D2s_v3'
 param vmCount int = 1
@@ -48,12 +51,12 @@ var containerNames = {
   exportPendingContainerName: 'export-pending'
 }
 
-// vnet configuration if building new virtual network for research workspace
+// Virtual Network configuration for building a new virtual network for research workspace
 var vnetAddressPrefixes = [
   '172.17.0.0/24'
 ]
 
-// subnet configuration if building new virtual network for research workspace
+// Subnet configuration for building a new virtual network for research workspace
 var subnets = {
   privateEndpoints: {
     name: 'privateEndpoints'
@@ -215,5 +218,6 @@ module access './access.bicep' = if (avdAccess) {
     avdSubnetId: empty(virtualNetwork) ? workspaceVnet.outputs.workloadSubnetId : computeSubnetId
     rdshPrefix: 'rdsh'
     tags: tags.All_Resources
+    vmAdministratorAccountPassword: vmAdministratorAccountPassword
   }
 }

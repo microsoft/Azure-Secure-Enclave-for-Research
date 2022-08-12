@@ -9,15 +9,17 @@ param privateStorageAccountRG string
 param containerNames object
 param approverEmail string
 param pipelineName string
+
 param tags object = {}
 param userAssignedManagedIdentity object = {}
 
+// The roles that a new User Assigned Managed Identity would need to perform post-deployment tasks
 var uamiRoles = {
   'Storage Account Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '17d1049b-9a84-46fb-8f53-869881c3d3ab')
   'Data Factory Contributor': subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '673868aa-7521-48a0-acc6-0f60742d39f5')
 }
 
-// get the workspace resource group
+// Get the workspace's resource group
 resource dataAutomationRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: privateStorageAccountRG
 }
@@ -36,7 +38,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-
   scope: existingUamiRG
 }
 
-// user assigned managed identity for Post Deployment Tasks
+// Create a new User Assigned Managed Identity for post-deployment tasks
 module uami '../child_modules/uami.bicep' = if (empty(userAssignedManagedIdentity)) {
   name: replace(deploymentNameStructure, '{rtype}', 'uami')
   scope: dataAutomationRG
@@ -157,6 +159,7 @@ module exportTrigger '../child_modules/adfTrigger.bicep' = {
   }
 }
 
+// Create a managed private endpoint in the managed network for the secured storage account
 module adfManagedPrivateEndpoint '../child_modules/adfManagedPrivateEndpoint.bicep' = {
   name: replace(deploymentNameStructure, '{rtype}', 'adf-pep')
   scope: dataAutomationRG
@@ -164,10 +167,11 @@ module adfManagedPrivateEndpoint '../child_modules/adfManagedPrivateEndpoint.bic
     adfName: adf.outputs.name
     privateStorageAccountId: storageAccount.id
     privateStorageAccountName: privateStorageAccountName
+    managedVNetName: adf.outputs.managedVNetName
   }
 }
 
-// deployment script for post deployment tasks
+// Deployment script to start the ADF triggers
 module deploymentScript '../child_modules/deploymentScript.bicep' = {
   name: 'StartTrigger-${replace(deploymentNameStructure, '{rtype}', 'dplscr')}'
   scope: dataAutomationRG

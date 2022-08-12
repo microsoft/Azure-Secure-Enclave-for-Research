@@ -34,7 +34,6 @@
 						"Microsoft.ContainerInstance",
 						"Microsoft.Logic",
 						"Microsoft.Management",
-						"Microsoft.ApiManagement",
 						"Microsoft.Storage",
 						"Microsoft.DesktopVirtualization",
 						"Microsoft.EventGrid",
@@ -91,18 +90,6 @@
 						{
 							"label": "Sandbox",
 							"value": "box"
-						},
-						{
-							"label": "Staging",
-							"value": "stg"
-						},
-						{
-							"label": "Shared",
-							"value": "shared"
-						},
-						{
-							"label": "UAT",
-							"value": "uat"
 						}
 					]
 				},
@@ -126,7 +113,7 @@
 									"value": false
 								},
 								{
-									"label": "Existing",
+									"label": "Existing (not recommended)",
 									"value": true
 								}
 							],
@@ -176,7 +163,7 @@
 							{
 								"name": "instance",
 								"type": "Microsoft.Common.TextBox",
-								"label": "Instance of Workspace",
+								"label": "Instance of workspace",
 								"defaultValue": "1",
 								"toolTip": "Instance suffix for resources. Presented as two digits in the naming convention.",
 								"constraints": {
@@ -206,7 +193,7 @@
 											"value": false
 										},
 										{
-											"label": "Existing",
+											"label": "Existing (not recommended)",
 											"value": true
 										}
 									],
@@ -249,9 +236,9 @@
 							{
 								"name": "peerToHub",
 								"type": "Microsoft.Common.OptionsGroup",
-								"label": "Peer to an existing HUB?",
+								"label": "Peer to an existing hub network?",
 								"defaultValue": "No",
-								"toolTip": "Will the workspace virtual network need to be peered with an existing hub virtual network? If so, you will need to manage NSG rules and specific routes on the resources deployed from this template. If this option is not selected, a default NSG rule will be placed on all NSGs to limit internet access.",
+								"toolTip": "Will the workspace virtual network need to be peered with an existing hub virtual network? If so, you will need to manage NSG rules and specific routes on the resources deployed from this template. If this option is not selected, a default NSG rule will be placed on all subnets to limit internet access.",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -305,7 +292,7 @@
 								"type": "Microsoft.Common.OptionsGroup",
 								"label": "New or Existing Secured Storage",
 								"defaultValue": "New",
-								"toolTip": "Choose 'New' to create a new privatatized storage account or 'Existing' to choose an existing storage account.",
+								"toolTip": "Choose 'New' to create a new private storage account or 'Existing' to choose an existing storage account.",
 								"constraints": {
 									"allowedValues": [
 										{
@@ -313,7 +300,7 @@
 											"value": false
 										},
 										{
-											"label": "Existing",
+											"label": "Existing (not recommended)",
 											"value": true
 										}
 									],
@@ -384,12 +371,25 @@
 								}
 							},
 							{
+								"name": "avdAzureUserPassword",
+								"type": "Microsoft.Common.PasswordBox",
+								"label": {
+									"password": "Password",
+									"confirmPassword": "Confirm password"
+								},
+								"options": {
+									"hideConfirmation": false
+								},
+								"toolTip": "The password for the AzureUser local user account on the session host VMs.",
+								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+							},
+							{
 								"name": "vmSizeSelector",
 								"type": "Microsoft.Compute.SizeSelector",
 								"label": "Session Host Size",
-								"toolTip": "Choose the size for the ",
+								"toolTip": "Choose the size for the AVD session host virtual machine(s).",
 								"recommendedSizes": [
-									"Standard_D3"
+									"Standard_D2as_v4"
 								],
 								"constraints": {
 									"allowedSizes": "[map(steps('workspaceConfig').remoteAccessSection.vmSizesApi.value, (item) => item.name)]",
@@ -445,7 +445,7 @@
 						"type": "Microsoft.ManagedIdentity.IdentitySelector",
 						"label": "Managed Identity Configuration",
 						"toolTip": {
-							"userAssignedIdentity": "Select an **existing** user assigned identity required for data processing automation. This identity must be assigned 'Storage Account Contributor' and 'Data Factory Contributor' scoped at the resource group level or higher, where the data automation resources are deployed."
+							"userAssignedIdentity": "Optionally, select an existing user assigned identity required for data processing automation. This identity must be assigned 'Storage Account Contributor' and 'Data Factory Contributor' scoped at the resource group level or higher, where the data automation resources are deployed."
 						},
 						"defaultValue": {
 							"systemAssignedIdentity": "Off"
@@ -478,6 +478,7 @@
 			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
 			"avdAccess": "[steps('workspaceConfig').remoteAccessSection.avdAccess]",
 			"rdshVmSize": "[steps('workspaceConfig').remoteAccessSection.vmSizeSelector]",
+			"vmAdministratorAccountPassword": "[steps('workspaceConfig').remoteAccessSection.avdAzureUserPassword]",
 			"vmCount": "[steps('workspaceConfig').remoteAccessSection.vmCount]",
 			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
