@@ -1,0 +1,73 @@
+{
+	"name": "Move Data",
+	"type": "Copy",
+	"dependsOn": [],
+	"policy": {
+		"timeout": "7.00:00:00",
+		"retry": 0,
+		"retryIntervalInSeconds": 30,
+		"secureOutput": false,
+		"secureInput": false
+	},
+	"userProperties": [],
+	"typeProperties": {
+		"source": {
+			"type": "BinarySource",
+			"storeSettings": {
+				"type": "AzureBlobFSReadSettings",
+				"recursive": true,
+				"deleteFilesAfterCompletion": true
+			},
+			"formatSettings": {
+				"type": "BinaryReadSettings"
+			}
+		},
+		"sink": {
+			"type": "BinarySink",
+			"storeSettings": {
+				"type": "AzureBlobFSWriteSettings"
+			}
+		},
+		"enableStaging": false
+	},
+	"inputs": [
+		{
+			"referenceName": "DfsDataset",
+			"type": "DatasetReference",
+			"parameters": {
+				"storageAccountName": {
+					"value": "@pipeline().parameters.sourceStorageAccountName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@pipeline().parameters.sourceFolderPath",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@pipeline().parameters.fileName",
+					"type": "Expression"
+				}
+			}
+		}
+	],
+	"outputs": [
+		{
+			"referenceName": "DfsDataset",
+			"type": "DatasetReference",
+			"parameters": {
+				"storageAccountName": {
+					"value": "@pipeline().parameters.sinkStorageAccountName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@pipeline().parameters.sinkFolderPath",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@pipeline().parameters.fileName",
+					"type": "Expression"
+				}
+			}
+		}
+	]
+}

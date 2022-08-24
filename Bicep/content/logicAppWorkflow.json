@@ -1,0 +1,129 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    },
+    "subscriptionId": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "dataFactoryRG": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "dataFactoryName": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "pipelineName": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "storageAccountName": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "approverEmail": {
+      "defaultValue": "",
+      "type": "String"
+    }
+  },
+  "triggers": {
+    "When_a_blob_is_added_or_modified_(properties_only)_(V2)": {
+      "evaluatedRecurrence": {
+        "frequency": "Minute",
+        "interval": 1
+      },
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azureblob']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/v2/datasets/@{parameters('storageAccountName')}/triggers/batch/onupdatedfile",
+        "queries": {
+          "checkBothCreatedAndModifiedDateTime": false,
+          "folderId": "/export-pending",
+          "maxFileCount": 1
+        }
+      },
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 1
+      },
+      "splitOn": "@triggerBody()",
+      "type": "ApiConnection"
+    }
+  },
+  "actions": {
+    "Condition": {
+      "actions": {
+        "Create_a_pipeline_run": {
+          "inputs": {
+            "body": {
+              "fileName": "@triggerBody()?['Name']",
+              "sinkFolderPath": "export-approved",
+              "sinkStorageAccountName": "@parameters('storageAccountName')",
+              "sourceFolderPath": "export-pending",
+              "sourceStorageAccountName": "@parameters('storageAccountName')"
+            },
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['azuredatafactory']['connectionId']"
+              }
+            },
+            "method": "post",
+            "path": "/subscriptions/@{parameters('subscriptionId')}/resourcegroups/@{parameters('dataFactoryRG')}/providers/Microsoft.DataFactory/factories/@{parameters('dataFactoryName')}/pipelines/@{parameters('pipelineName')}/CreateRun",
+            "queries": {
+              "x-ms-api-version": "2017-09-01-preview"
+            }
+          },
+          "runAfter": {},
+          "type": "ApiConnection"
+        }
+      },
+      "expression": {
+        "and": [
+          {
+            "equals": [
+              "@body('Send_approval_email')?['SelectedOption']",
+              "Approve"
+            ]
+          }
+        ]
+      },
+      "runAfter": {
+        "Send_approval_email": ["Succeeded"]
+      },
+      "type": "If"
+    },
+    "Send_approval_email": {
+      "inputs": {
+        "body": {
+          "Message": {
+            "HideHTMLMessage": false,
+            "Importance": "Normal",
+            "Options": "Approve, Reject",
+            "ShowHTMLConfirmationDialog": false,
+            "Subject": "Approval Request",
+            "To": "@parameters('approverEmail')"
+          },
+          "NotificationUrl": "@{listCallbackUrl()}"
+        },
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['office365']['connectionId']"
+          }
+        },
+        "path": "/approvalmail/$subscriptions"
+      },
+      "runAfter": {},
+      "type": "ApiConnectionWebhook"
+    }
+  },
+  "outputs": {}
+}
