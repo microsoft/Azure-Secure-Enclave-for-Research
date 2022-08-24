@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "11340930750403786765"
+      "templateHash": "16098683590999617451"
     }
   },
   "parameters": {
@@ -722,7 +722,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "11705714515434781017"
+              "templateHash": "18348964896697504300"
             }
           },
           "parameters": {
@@ -904,7 +904,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.9.1.41621",
-                      "templateHash": "1318257031248582286"
+                      "templateHash": "3729986653225290454"
                     }
                   },
                   "parameters": {
@@ -1212,7 +1212,7 @@
                     },
                     "managedVNetName": {
                       "type": "string",
-                      "value": "[format('{0}/{1}', replace(variables('baseName'), '{rtype}', 'adf'), variables('managedVnetName'))]"
+                      "value": "[variables('managedVnetName')]"
                     }
                   }
                 }
