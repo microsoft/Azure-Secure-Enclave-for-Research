@@ -4,12 +4,9 @@ param deploymentTime string = utcNow()
 param location string = deployment().location
 @allowed([
   'dev'
-  'test'
-  'prod'
-  'sandbox'
-  'staging'
-  'shared'
-  'uat'
+  'tst'
+  'prd'
+  'box'
 ])
 param environment string
 param workspaceName string
