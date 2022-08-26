@@ -4,12 +4,9 @@ param deploymentTime string = utcNow()
 param location string = deployment().location
 @allowed([
   'dev'
-  'test'
-  'prod'
-  'sandbox'
-  'staging'
-  'shared'
-  'uat'
+  'tst'
+  'prd'
+  'box'
 ])
 param environment string
 param workspaceName string
@@ -93,17 +90,17 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-03
 resource sharedWorkspaceRG 'Microsoft.Resources/resourceGroups@2021-04-01' = if (empty(logAnalytics)) {
   name: replace(replace(namingStructure, '{subwloadname}', 'sharedsvc'), '{rtype}', 'rg')
   location: location
-  tags: tags.All_Resources
+  tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
 }
 
 // Create the log analytics workspace resource if the logAnalytics object wasn't supplied at deployment
 module workspaceLaw '../child_modules/logAnalytics.bicep' = if (empty(logAnalytics)) {
-  name: replace(deploymentNameStructure, '{rtype}', 'law')
+  name: replace(deploymentNameStructure, '{rtype}', 'log')
   scope: sharedWorkspaceRG
   params: {
     namingStructure: namingStructure
     location: location
-    tags: tags.All_Resources
+    tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
   }
 }
 
@@ -113,7 +110,7 @@ module workspaceLaw '../child_modules/logAnalytics.bicep' = if (empty(logAnalyti
 resource newNetworkWorkspaceRG 'Microsoft.Resources/resourceGroups@2021-04-01' = if (empty(virtualNetwork)) {
   name: replace(replace(namingStructure, '{subwloadname}', 'network'), '{rtype}', 'rg')
   location: location
-  tags: tags.All_Resources
+  tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
 }
 
 // Create the virtual network if the virtualNetwork object wasn't supplied at deployment
@@ -127,7 +124,7 @@ module workspaceVnet '../child_modules/network.bicep' = if (empty(virtualNetwork
     subnets: subnets
     defaultRouteNextHop: defaultRouteNextHop
     hubVirtualNetworkId: hubVirtualNetworkId
-    tags: tags.All_Resources
+    tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
   }
 }
 
@@ -136,7 +133,7 @@ module workspaceVnet '../child_modules/network.bicep' = if (empty(virtualNetwork
 //   scope: subscription()
 //   params: {
 //     location: location
-//     tags: tags.All_Resources
+//     tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
 //     deploymentNameStructure: deploymentNameStructure
 //   }
 // }
@@ -158,7 +155,7 @@ resource existingPrivateStorageAccount 'Microsoft.Storage/storageAccounts@2021-0
 resource newDataWorkspaceRG 'Microsoft.Resources/resourceGroups@2021-04-01' = if (empty(privateStorage)) {
   name: replace(replace(namingStructure, '{subwloadname}', 'storage'), '{rtype}', 'rg')
   location: location
-  tags: tags.All_Resources
+  tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
 }
 
 // Create the private storage account if the storageAccount object wasn't supplied at deployment
@@ -177,7 +174,7 @@ module newPrivateStorageAccount '../child_modules/storage_account.bicep' = if (e
     vnetId: empty(virtualNetwork) ? workspaceVnet.outputs.vnetId : virtualNetwork.id
     subnetId: empty(virtualNetwork) ? workspaceVnet.outputs.pepSubnetId : privateEndpointSubnetId
     privatize: true
-    tags: tags.All_Resources
+    tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
   }
 }
 
@@ -201,7 +198,7 @@ module dataAutomation './dataAutomation.bicep' = {
     privateStorageAccountRG: empty(privateStorage) ? newDataWorkspaceRG.name : existingPrivateStorageRG.name
     approverEmail: approverEmail
     userAssignedManagedIdentity: userAssignedManagedIdentity
-    tags: tags.All_Resources
+    tags: empty(tags) ? {} : (empty(tags['Data Automation']) ? {} : tags['Data Automation'])
   }
 }
 
@@ -217,7 +214,7 @@ module access './access.bicep' = if (avdAccess) {
     rdshVmSize: rdshVmSize
     avdSubnetId: empty(virtualNetwork) ? workspaceVnet.outputs.workloadSubnetId : computeSubnetId
     rdshPrefix: 'rdsh'
-    tags: tags.All_Resources
+    tags: empty(tags) ? {} : (empty(tags['Remote Access']) ? {} : tags['Remote Access'])
     vmAdministratorAccountPassword: vmAdministratorAccountPassword
   }
 }
