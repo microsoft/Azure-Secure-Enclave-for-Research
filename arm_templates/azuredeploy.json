@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "16098683590999617451"
+      "templateHash": "11904230111753892225"
     }
   },
   "parameters": {
@@ -130,7 +130,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'sharedsvc'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[parameters('tags').All_Resources]"
+      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
     },
     {
       "condition": "[empty(parameters('virtualNetwork'))]",
@@ -138,7 +138,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[parameters('tags').All_Resources]"
+      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
     },
     {
       "condition": "[empty(parameters('privateStorage'))]",
@@ -146,7 +146,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[parameters('tags').All_Resources]"
+      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
     },
     {
       "condition": "[empty(parameters('logAnalytics'))]",
@@ -167,7 +167,7 @@
             "value": "[parameters('location')]"
           },
           "tags": {
-            "value": "[parameters('tags').All_Resources]"
+            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
           }
         },
         "template": {
@@ -254,7 +254,7 @@
             "value": "[parameters('hubVirtualNetworkId')]"
           },
           "tags": {
-            "value": "[parameters('tags').All_Resources]"
+            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
           }
         },
         "template": {
@@ -451,7 +451,7 @@
             "value": true
           },
           "tags": {
-            "value": "[parameters('tags').All_Resources]"
+            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
           }
         },
         "template": {
@@ -712,7 +712,7 @@
             "value": "[parameters('userAssignedManagedIdentity')]"
           },
           "tags": {
-            "value": "[parameters('tags').All_Resources]"
+            "value": "[if(empty(parameters('tags')['Data Automation']), createObject(), parameters('tags')['Data Automation'])]"
           }
         },
         "template": {
@@ -2334,7 +2334,7 @@
             "value": "rdsh"
           },
           "tags": {
-            "value": "[parameters('tags').All_Resources]"
+            "value": "[if(empty(parameters('tags')['Remote Access']), createObject(), parameters('tags')['Remote Access'])]"
           },
           "vmAdministratorAccountPassword": {
             "value": "[parameters('vmAdministratorAccountPassword')]"
