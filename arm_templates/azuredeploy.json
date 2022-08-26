@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "5912676971998217198"
+      "templateHash": "14557857738524643099"
     }
   },
   "parameters": {
@@ -149,7 +149,7 @@
       "condition": "[empty(parameters('logAnalytics'))]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[replace(variables('deploymentNameStructure'), '{rtype}', 'law')]",
+      "name": "[replace(variables('deploymentNameStructure'), '{rtype}', 'log')]",
       "resourceGroup": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'sharedsvc'), '{rtype}', 'rg')]",
       "properties": {
         "expressionEvaluationOptions": {
