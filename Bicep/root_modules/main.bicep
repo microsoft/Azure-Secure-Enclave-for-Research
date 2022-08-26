@@ -95,7 +95,7 @@ resource sharedWorkspaceRG 'Microsoft.Resources/resourceGroups@2021-04-01' = if 
 
 // Create the log analytics workspace resource if the logAnalytics object wasn't supplied at deployment
 module workspaceLaw '../child_modules/logAnalytics.bicep' = if (empty(logAnalytics)) {
-  name: replace(deploymentNameStructure, '{rtype}', 'law')
+  name: replace(deploymentNameStructure, '{rtype}', 'log')
   scope: sharedWorkspaceRG
   params: {
     namingStructure: namingStructure
