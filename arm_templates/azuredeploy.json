@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "2954343964231317453"
+      "templateHash": "6886658249089213525"
     }
   },
   "parameters": {
@@ -174,7 +174,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.9.1.41621",
-              "templateHash": "10242738643109691952"
+              "templateHash": "16859550546706231566"
             }
           },
           "parameters": {
@@ -200,7 +200,7 @@
             {
               "type": "Microsoft.OperationalInsights/workspaces",
               "apiVersion": "2020-03-01-preview",
-              "name": "[replace(variables('baseName'), '{rtype}', 'law')]",
+              "name": "[replace(variables('baseName'), '{rtype}', 'log')]",
               "location": "[parameters('location')]",
               "properties": {
                 "retentionInDays": 30,
