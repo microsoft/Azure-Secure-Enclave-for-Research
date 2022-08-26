@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.9.1.41621",
-      "templateHash": "6886658249089213525"
+      "templateHash": "5912676971998217198"
     }
   },
   "parameters": {
@@ -127,7 +127,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'sharedsvc'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+      "tags": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
     },
     {
       "condition": "[empty(parameters('virtualNetwork'))]",
@@ -135,7 +135,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+      "tags": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
     },
     {
       "condition": "[empty(parameters('privateStorage'))]",
@@ -143,7 +143,7 @@
       "apiVersion": "2021-04-01",
       "name": "[replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg')]",
       "location": "[parameters('location')]",
-      "tags": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+      "tags": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
     },
     {
       "condition": "[empty(parameters('logAnalytics'))]",
@@ -164,7 +164,7 @@
             "value": "[parameters('location')]"
           },
           "tags": {
-            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
           }
         },
         "template": {
@@ -251,7 +251,7 @@
             "value": "[parameters('hubVirtualNetworkId')]"
           },
           "tags": {
-            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
           }
         },
         "template": {
@@ -448,7 +448,7 @@
             "value": true
           },
           "tags": {
-            "value": "[if(empty(parameters('tags').Core), createObject(), parameters('tags').Core)]"
+            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
           }
         },
         "template": {
@@ -709,7 +709,7 @@
             "value": "[parameters('userAssignedManagedIdentity')]"
           },
           "tags": {
-            "value": "[if(empty(parameters('tags')['Data Automation']), createObject(), parameters('tags')['Data Automation'])]"
+            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags')['Data Automation']), createObject(), parameters('tags')['Data Automation']))]"
           }
         },
         "template": {
@@ -2331,7 +2331,7 @@
             "value": "rdsh"
           },
           "tags": {
-            "value": "[if(empty(parameters('tags')['Remote Access']), createObject(), parameters('tags')['Remote Access'])]"
+            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags')['Remote Access']), createObject(), parameters('tags')['Remote Access']))]"
           },
           "vmAdministratorAccountPassword": {
             "value": "[parameters('vmAdministratorAccountPassword')]"
