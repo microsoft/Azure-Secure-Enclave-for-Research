@@ -366,7 +366,7 @@
 									"regex": "^\\d{1,2}$",
 									"validationMessage": ""
 								},
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "vmSizesApi",
@@ -387,7 +387,7 @@
 									"hideConfirmation": false
 								},
 								"toolTip": "The password for the AzureUser local user account on the session host VMs.",
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "vmSizeSelector",
@@ -405,7 +405,7 @@
 									"hideDiskTypeFilter": false
 								},
 								"osPlatform": "Windows",
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "computeSubnetDropDown",
