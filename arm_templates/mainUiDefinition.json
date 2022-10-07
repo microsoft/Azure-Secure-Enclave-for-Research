@@ -383,6 +383,11 @@
 									"password": "Password",
 									"confirmPassword": "Confirm password"
 								},
+								"constraints": {
+									"required": true,
+									"regex": "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){12,123}$",
+									"validationMessage": "Password must be at least 12 characters long to comply with Azure Policy."
+								},
 								"options": {
 									"hideConfirmation": false
 								},
@@ -486,7 +491,7 @@
 			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
 			"avdAccess": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]",
 			"rdshVmSize": "[steps('remoteAccessConfig').remoteAccessSection.vmSizeSelector]",
-			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, '')]",
+			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, 'wontbeused')]",
 			"vmCount": "[steps('remoteAccessConfig').remoteAccessSection.vmCount]",
 			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
