@@ -322,7 +322,13 @@
 								"visible": "[steps('workspaceConfig').storageSection.newOrExistingStorage]"
 							}
 						]
-					},
+					}
+				]
+			},
+			{
+				"name": "remoteAccessConfig",
+				"label": "Remote Access",
+				"elements": [
 					{
 						"name": "remoteAccessSection",
 						"type": "Microsoft.Common.Section",
@@ -478,10 +484,10 @@
 			"environment": "[basics('environment')]",
 			"workspaceName": "[steps('workspaceConfig').workspaceSection.workspaceName]",
 			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
-			"avdAccess": "[steps('workspaceConfig').remoteAccessSection.avdAccess]",
-			"rdshVmSize": "[steps('workspaceConfig').remoteAccessSection.vmSizeSelector]",
-			"vmAdministratorAccountPassword": "[steps('workspaceConfig').remoteAccessSection.avdAzureUserPassword]",
-			"vmCount": "[steps('workspaceConfig').remoteAccessSection.vmCount]",
+			"avdAccess": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]",
+			"rdshVmSize": "[steps('remoteAccessConfig').remoteAccessSection.vmSizeSelector]",
+			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, json('null'))]",
+			"vmCount": "[steps('remoteAccessConfig').remoteAccessSection.vmCount]",
 			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
 			"hubVirtualNetworkId": "[if(and(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.peerToHub), steps('workspaceConfig').networkingSection.hubVnetSelector.id, '')]",
