@@ -386,7 +386,7 @@
 								"constraints": {
 									"required": true,
 									"regex": "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){12,123}$",
-									"validationMessage": "Password must be at least 12 characters long to comply with Azure Policy."
+									"validationMessage": "Password must be at least 12 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character (other than _ and :) to comply with Azure Policy."
 								},
 								"options": {
 									"hideConfirmation": false
