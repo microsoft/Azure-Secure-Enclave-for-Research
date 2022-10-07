@@ -322,7 +322,13 @@
 								"visible": "[steps('workspaceConfig').storageSection.newOrExistingStorage]"
 							}
 						]
-					},
+					}
+				]
+			},
+			{
+				"name": "remoteAccessConfig",
+				"label": "Remote Access",
+				"elements": [
 					{
 						"name": "remoteAccessSection",
 						"type": "Microsoft.Common.Section",
@@ -360,7 +366,7 @@
 									"regex": "^\\d{1,2}$",
 									"validationMessage": ""
 								},
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "vmSizesApi",
@@ -377,11 +383,16 @@
 									"password": "Password",
 									"confirmPassword": "Confirm password"
 								},
+								"constraints": {
+									"required": true,
+									"regex": "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){12,123}$",
+									"validationMessage": "Password must be at least 12 characters long and contain at least one lowercase letter, one uppercase letter, one digit, and one special character (other than _ and :) to comply with Azure Policy."
+								},
 								"options": {
 									"hideConfirmation": false
 								},
 								"toolTip": "The password for the AzureUser local user account on the session host VMs.",
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "vmSizeSelector",
@@ -399,7 +410,7 @@
 									"hideDiskTypeFilter": false
 								},
 								"osPlatform": "Windows",
-								"visible": "[steps('workspaceConfig').remoteAccessSection.avdAccess]"
+								"visible": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]"
 							},
 							{
 								"name": "computeSubnetDropDown",
@@ -410,7 +421,7 @@
 									"allowedValues": "[map(steps('workspaceConfig').networkingSection.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
 									"required": true
 								},
-								"visible": "[and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet)]"
+								"visible": "[and(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet)]"
 							}
 						]
 					}
@@ -478,15 +489,15 @@
 			"environment": "[basics('environment')]",
 			"workspaceName": "[steps('workspaceConfig').workspaceSection.workspaceName]",
 			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
-			"avdAccess": "[steps('workspaceConfig').remoteAccessSection.avdAccess]",
-			"rdshVmSize": "[steps('workspaceConfig').remoteAccessSection.vmSizeSelector]",
-			"vmAdministratorAccountPassword": "[steps('workspaceConfig').remoteAccessSection.avdAzureUserPassword]",
-			"vmCount": "[steps('workspaceConfig').remoteAccessSection.vmCount]",
+			"avdAccess": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]",
+			"rdshVmSize": "[steps('remoteAccessConfig').remoteAccessSection.vmSizeSelector]",
+			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, 'wontbeused')]",
+			"vmCount": "[steps('remoteAccessConfig').remoteAccessSection.vmCount]",
 			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
 			"hubVirtualNetworkId": "[if(and(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.peerToHub), steps('workspaceConfig').networkingSection.hubVnetSelector.id, '')]",
 			"defaultRouteNextHop": "[steps('workspaceConfig').networkingSection.defaultRouteNextHop]",
-			"computeSubnetId": "[if(and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet), concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').remoteAccessSection.computeSubnetDropDown), '')]",
+			"computeSubnetId": "[if(and(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet), concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('remoteAccessConfig').remoteAccessSection.computeSubnetDropDown), '')]",
 			"privateEndpointSubnetId": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').networkingSection.privateEndpointSubnetDropDown), '')]",
 			"PrivateStorage": "[if(steps('workspaceConfig').storageSection.newOrExistingStorage, steps('workspaceConfig').storageSection.storageSelector, parse('{}'))]",
 			"LogAnalytics": "[if(basics('loggingConfig').newOrExistingLogAnalytics, basics('loggingConfig').logAnalyticsSelector, parse('{}'))]",
