@@ -486,7 +486,7 @@
 			"sequence": "[steps('workspaceConfig').workspaceSection.instance]",
 			"avdAccess": "[steps('remoteAccessConfig').remoteAccessSection.avdAccess]",
 			"rdshVmSize": "[steps('remoteAccessConfig').remoteAccessSection.vmSizeSelector]",
-			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, parse(''))]",
+			"vmAdministratorAccountPassword": "[if(steps('remoteAccessConfig').remoteAccessSection.avdAccess, steps('remoteAccessConfig').remoteAccessSection.avdAzureUserPassword, '')]",
 			"vmCount": "[steps('remoteAccessConfig').remoteAccessSection.vmCount]",
 			"approverEmail": "[steps('dataAutomationConfig').dataAutomationSection.approverEmail]",
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
