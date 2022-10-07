@@ -492,7 +492,7 @@
 			"virtualNetwork": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.vnetSelector, parse('{}'))]",
 			"hubVirtualNetworkId": "[if(and(steps('workspaceConfig').networkingSection.newOrExistingVnet, steps('workspaceConfig').networkingSection.peerToHub), steps('workspaceConfig').networkingSection.hubVnetSelector.id, '')]",
 			"defaultRouteNextHop": "[steps('workspaceConfig').networkingSection.defaultRouteNextHop]",
-			"computeSubnetId": "[if(and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet), concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').remoteAccessSection.computeSubnetDropDown), '')]",
+			"computeSubnetId": "[if(and(steps('workspaceConfig').remoteAccessSection.avdAccess, steps('workspaceConfig').networkingSection.newOrExistingVnet), concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('remoteAccessConfig').remoteAccessSection.computeSubnetDropDown), '')]",
 			"privateEndpointSubnetId": "[if(steps('workspaceConfig').networkingSection.newOrExistingVnet, concat(steps('workspaceConfig').networkingSection.vnetSelector.id, '/subnets/', steps('workspaceConfig').networkingSection.privateEndpointSubnetDropDown), '')]",
 			"PrivateStorage": "[if(steps('workspaceConfig').storageSection.newOrExistingStorage, steps('workspaceConfig').storageSection.storageSelector, parse('{}'))]",
 			"LogAnalytics": "[if(basics('loggingConfig').newOrExistingLogAnalytics, basics('loggingConfig').logAnalyticsSelector, parse('{}'))]",
