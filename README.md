@@ -20,6 +20,8 @@ This repository contains a set of Bicep templates which will deploy a complete S
 
 To help you with the process of deploying research environments, refer to the ["Secure Research" Azure DevOps Generator](https://azuredevopsdemogenerator.azurewebsites.net/?name=secresearch) template. This Azure DevOps template contains Azure Boards work items to guide you through the design decisions and deployment of a complete research environment.
 
+For complete documentation, please refer to the [Wiki](/wiki).
+
 ## Similar Projects
 
 These projects may also be useful for groups which would like to get started working with sensitive data sets on Microsoft Azure.
