@@ -28,7 +28,8 @@ resource vNet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
       name: s.value.name
       properties: {
         addressPrefix: s.value.addressPrefix
-        privateEndpointNetworkPolicies: !empty(s.value.privateEndpointNetworkPolicies) ? 'Disabled' : s.value.privateEndpointNetworkPolicies
+        // If no private endpoint policy setting is specified, assume Disabled
+        privateEndpointNetworkPolicies: empty(s.value.privateEndpointNetworkPolicies) ? 'Disabled' : s.value.privateEndpointNetworkPolicies
         networkSecurityGroup: {
           id: networkSecurityGroups[index].id
         }
@@ -42,11 +43,11 @@ resource vNet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
 }
 
 // Create a network security group for each subnet
-resource networkSecurityGroups 'Microsoft.Network/networkSecurityGroups@2021-05-01' = [for s in items(subnets): {
+resource networkSecurityGroups 'Microsoft.Network/networkSecurityGroups@2021-05-01' = [for (s, i) in items(subnets): {
   name: 'nsg-${s.value.name}'
   location: location
   properties: {
-    securityRules: !empty(nsgSecurityRules) ? nsgSecurityRules : json('null')
+    securityRules: (!empty(nsgSecurityRules) && length(nsgSecurityRules) >= (i + 1)) ? (!empty(nsgSecurityRules[i]) ? nsgSecurityRules[i] : json('null')) : json('null')
   }
   tags: tags
 }]
@@ -72,13 +73,15 @@ resource routeTables 'Microsoft.Network/routeTables@2021-05-01' = [for s in item
 }]
 
 // Peer the new VNet to a hub VNet, if specified
+// TODO: Extract to peering module
+// TODO: Create other side of the peering
 resource peerToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01' = if (!empty(hubVirtualNetworkId)) {
   name: '${vNet.name}-to-${last(split(hubVirtualNetworkId, '/'))}'
   parent: vNet
   properties: {
     allowForwardedTraffic: true
     allowGatewayTransit: false
-    allowVirtualNetworkAccess: true
+    allowVirtualNetworkAccess: false
     remoteVirtualNetwork: {
       id: hubVirtualNetworkId
     }
@@ -86,16 +89,20 @@ resource peerToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
   }
 }
 
-// Retrieve the newly created subnets to enable returning their resource IDs
-resource pepSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' existing = {
-  name: '${vNet.name}/${subnets.privateEndpoints.name}'
-}
+// Get the subnets' IDs in the same order as in the parameter array
+// The value of vnet.subnets might be out of order
+resource subnetRes 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = [for subnet in items(subnets): {
+  name: subnet.value.name
+  parent: vNet
+}]
 
-resource workloadSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' existing = {
-  name: '${vNet.name}/${subnets.workload.name}'
+output vNetId string = vNet.id
+// Ensure the subnet IDs are output in the same order as they were provided
+// See https://github.com/Azure/bicep/discussions/4953 for background on this technique
+output subnetIds array = [for (subnet, i) in items(subnets): subnetRes[i].id]
+output vNetName string = vNet.name
+output vNet object = {
+  id: vNet.id
+  name: vNet.name
+  resourceGroupName: resourceGroup().name
 }
-
-output vnetId string = vNet.id
-// TODO: return as custom object or array instead
-output pepSubnetId string = pepSubnet.id
-output workloadSubnetId string = workloadSubnet.id

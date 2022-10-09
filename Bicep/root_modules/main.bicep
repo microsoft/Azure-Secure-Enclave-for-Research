@@ -18,18 +18,25 @@ param tags object = {}
 param vmAdministratorAccountPassword string
 
 // Optional parameters
-param avdAccess bool = false
+param avdAccess bool = true
 param rdshVmSize string = 'Standard_D2s_v3'
 param vmCount int = 1
 param virtualNetwork object = {}
 param hubVirtualNetworkId string = ''
 param defaultRouteNextHop string = ''
-param computeSubnetId string = ''
-param privateEndpointSubnetId string = ''
+param existingPrivateEndpointSubnetId string = ''
 param privateStorage object = {}
 param logAnalytics object = {}
 param userAssignedManagedIdentity object = {}
 param pipelineName string = 'pipe-data_move'
+
+param workspaceVNetAddressPrefixes array = [
+  '172.17.0.0/24'
+]
+
+param accessVNetAddressPrefixes array = [
+  '172.18.0.0/24'
+]
 
 //########################################################################//
 //                                                                        //
@@ -39,7 +46,7 @@ param pipelineName string = 'pipe-data_move'
 
 var namingConvention = '{wloadname}-{subwloadname}-{rtype}-{env}-{loc}-{seq}'
 var sequenceFormatted = format('{0:00}', sequence)
-var deploymentNameStructure = toLower('${workspaceName}-{rtype}-${deploymentTime}')
+var deploymentNameStructure = toLower('${workspaceName}-${sequenceFormatted}-{rtype}-${deploymentTime}')
 var namingStructure = toLower(replace(replace(replace(replace(namingConvention, '{env}', environment), '{loc}', location), '{seq}', sequenceFormatted), '{wloadname}', workspaceName))
 
 var containerNames = {
@@ -49,25 +56,64 @@ var containerNames = {
 }
 
 // Virtual Network configuration for building a new virtual network for research workspace
-var vnetAddressPrefixes = [
-  '172.17.0.0/24'
-]
+var privateEndpointSubnetName = 'privateEndpoints'
+var computeSubnetName = 'compute'
 
 // Subnet configuration for building a new virtual network for research workspace
-var subnets = {
-  privateEndpoints: {
-    name: 'privateEndpoints'
+// WATCH OUT: the Bicep items() function will sort the subnets alphabetically by the key
+// TODO: Do not treat this as a dictionary, but rather an array to avoid this issue
+var workspaceSubnets = {
+  '10_${privateEndpointSubnetName}': {
+    name: privateEndpointSubnetName
     addressPrefix: '172.17.0.0/25'
     privateEndpointNetworkPolicies: 'Enabled'
     serviceEndpoints: []
   }
-  workload: {
-    name: 'compute'
+  '20_${computeSubnetName}': {
+    name: computeSubnetName
     addressPrefix: '172.17.0.128/25'
     privateEndpointNetworkPolicies: 'Disabled'
     serviceEndpoints: []
   }
 }
+
+var workspaceComputeSubnetNsgRules = [
+  // TODO: Create as a JSON content file and load
+  {
+    name: 'Allow_RDP_From_AVD'
+    properties: {
+      direction: 'Inbound'
+      priority: 200
+      protocol: 'TCP'
+      access: 'Allow'
+      sourceAddressPrefixes: accessVNetAddressPrefixes
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '3389'
+    }
+  }
+  {
+    name: 'Block_Internet_Access'
+    properties: {
+      direction: 'Outbound'
+      priority: 4096
+      protocol: '*'
+      access: 'Deny'
+      sourceAddressPrefix: 'VirtualNetwork'
+      sourcePortRange: '*'
+      destinationAddressPrefix: 'Internet'
+      destinationPortRange: '*'
+    }
+  }
+]
+var workspacePepSubnetNsgRules = []
+
+// The Network Security Group rules must be specified 
+// in the alphabetical order of the subnet dictionary object's keys
+var workspaceNsgRules = [
+  workspacePepSubnetNsgRules
+  workspaceComputeSubnetNsgRules
+]
 
 //########################################################################//
 //                                                                        //
@@ -81,7 +127,8 @@ resource existingLogAnalyticsRG 'Microsoft.Resources/resourceGroups@2021-04-01' 
 }
 
 // Get existing log analytics workspace if the logAnalytics object was supplied at deployment
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-03-01-preview' existing = if (!empty(logAnalytics)) {
+#disable-next-line no-unused-existing-resources
+resource existingLogAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-03-01-preview' existing = if (!empty(logAnalytics)) {
   name: logAnalytics.name
   scope: existingLogAnalyticsRG
 }
@@ -120,11 +167,12 @@ module workspaceVnet '../child_modules/network.bicep' = if (empty(virtualNetwork
   params: {
     location: location
     namingStructure: namingStructure
-    addressPrefixes: vnetAddressPrefixes
-    subnets: subnets
+    addressPrefixes: workspaceVNetAddressPrefixes
+    subnets: workspaceSubnets
     defaultRouteNextHop: defaultRouteNextHop
     hubVirtualNetworkId: hubVirtualNetworkId
     tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
+    nsgSecurityRules: workspaceNsgRules
   }
 }
 
@@ -171,8 +219,8 @@ module newPrivateStorageAccount '../child_modules/storage_account.bicep' = if (e
       containerNames.exportPendingContainerName
     ]
     // The private storage account must be integrated with a VNet
-    vnetId: empty(virtualNetwork) ? workspaceVnet.outputs.vnetId : virtualNetwork.id
-    subnetId: empty(virtualNetwork) ? workspaceVnet.outputs.pepSubnetId : privateEndpointSubnetId
+    vnetId: empty(virtualNetwork) ? workspaceVnet.outputs.vNetId : virtualNetwork.id
+    subnetId: empty(virtualNetwork) ? workspaceVnet.outputs.subnetIds[0] : existingPrivateEndpointSubnetId
     privatize: true
     tags: empty(tags) ? {} : (empty(tags.Core) ? {} : tags.Core)
   }
@@ -184,7 +232,8 @@ module newPrivateStorageAccount '../child_modules/storage_account.bicep' = if (e
 //                                                                        //
 //########################################################################//
 
-// run data automation module
+// DATA AUTOMATION MODULE
+// TODO: Add a switch to enable or disable
 module dataAutomation './dataAutomation.bicep' = {
   name: 'data-automation-${deploymentTime}'
   params: {
@@ -202,7 +251,7 @@ module dataAutomation './dataAutomation.bicep' = {
   }
 }
 
-// run avd access module if requested by user
+// REMOTE ACCESS MODULE (AVD)
 module access './access.bicep' = if (avdAccess) {
   name: 'access-${deploymentTime}'
   params: {
@@ -212,7 +261,8 @@ module access './access.bicep' = if (avdAccess) {
     deploymentNameStructure: deploymentNameStructure
     vmCount: vmCount
     rdshVmSize: rdshVmSize
-    avdSubnetId: empty(virtualNetwork) ? workspaceVnet.outputs.workloadSubnetId : computeSubnetId
+    vnetAddressPrefixes: accessVNetAddressPrefixes
+    workspaceVNet: workspaceVnet.outputs.vNet
     rdshPrefix: 'rdsh'
     tags: empty(tags) ? {} : (empty(tags['Remote Access']) ? {} : tags['Remote Access'])
     vmAdministratorAccountPassword: vmAdministratorAccountPassword
