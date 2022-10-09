@@ -51,9 +51,12 @@ module vnet '../child_modules/network.bicep' = {
   params: {
     location: location
     addressPrefixes: vnetAddressPrefixes
+    deploymentNameStructure: deploymentNameStructure
     // This replacement ensures that VNet name for the AVD VNet is different than the workspace VNet
     namingStructure: replace(namingStructure, '{rtype}', '{rtype}-avd')
     subnets: avdSubnets
+    // Do not specify hubVirtualNetworkId here, because that would only initiate the peering
+    // The next module will create a bi-directional peering
   }
 }
 

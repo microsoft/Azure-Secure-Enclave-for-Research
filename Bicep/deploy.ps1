@@ -1,4 +1,13 @@
+#Requires -Modules "Az"
+#Requires -PSEdition Core
+
+[CmdletBinding()]
+Param(
+	[int]$Sequence = 1
+)
+
 # The Azure region for resources
+# TODO: Turn into parameters
 [string] $location = "eastus"
 [string] $environment = "dev"
 [string] $workspaceName = "srdemo"
@@ -14,6 +23,8 @@
 	environment    = $environment
 	workspaceName  = $workspaceName
 	approverEmail  = $approverEmail
+	
+	sequence       = $Sequence
 }
 
 New-AzDeployment -TemplateFile root_modules/main.bicep -Location $location `

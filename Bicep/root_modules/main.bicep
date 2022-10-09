@@ -61,7 +61,7 @@ var computeSubnetName = 'compute'
 
 // Subnet configuration for building a new virtual network for research workspace
 // WATCH OUT: the Bicep items() function will sort the subnets alphabetically by the key
-// TODO: Do not treat this as a dictionary, but rather an array to avoid this issue
+// TODO: To avoid this issues, do not create this as a dictionary, but as an array instead
 var workspaceSubnets = {
   '10_${privateEndpointSubnetName}': {
     name: privateEndpointSubnetName
@@ -165,6 +165,7 @@ module workspaceVnet '../child_modules/network.bicep' = if (empty(virtualNetwork
   name: replace(deploymentNameStructure, '{rtype}', 'net')
   scope: newNetworkWorkspaceRG
   params: {
+    deploymentNameStructure: deploymentNameStructure
     location: location
     namingStructure: namingStructure
     addressPrefixes: workspaceVNetAddressPrefixes

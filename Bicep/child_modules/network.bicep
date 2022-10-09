@@ -2,6 +2,7 @@ param location string
 param namingStructure string
 param addressPrefixes array
 param subnets object
+param deploymentNameStructure string
 
 param subwloadname string = ''
 param dnsServers array = []
@@ -72,20 +73,16 @@ resource routeTables 'Microsoft.Network/routeTables@2021-05-01' = [for s in item
   tags: tags
 }]
 
-// Peer the new VNet to a hub VNet, if specified
-// TODO: Extract to peering module
+// Peer the new workspace VNet to a hub VNet, if specified
 // TODO: Create other side of the peering
-resource peerToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01' = if (!empty(hubVirtualNetworkId)) {
-  name: '${vNet.name}-to-${last(split(hubVirtualNetworkId, '/'))}'
-  parent: vNet
-  properties: {
-    allowForwardedTraffic: true
-    allowGatewayTransit: false
+module peerToHubModule 'networkPeering.bicep' = if (!empty(hubVirtualNetworkId)) {
+  name: replace(deploymentNameStructure, '{rtype}', 'net-peer')
+  params: {
+    localName: 'workspace'
+    localVNetName: vNet.name
+    remoteName: 'hub'
+    remoteVNetId: hubVirtualNetworkId
     allowVirtualNetworkAccess: false
-    remoteVirtualNetwork: {
-      id: hubVirtualNetworkId
-    }
-    useRemoteGateways: false
   }
 }
 
