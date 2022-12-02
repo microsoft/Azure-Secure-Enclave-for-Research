@@ -64,7 +64,7 @@ resource emailConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
 
 // logic app
 resource logicApp 'Microsoft.Logic/workflows@2019-05-01' = {
-  name: replace(baseName, '{rtype}', 'logicApp')
+  name: replace(baseName, '{rtype}', 'logic')
   location: location
   identity: {
     type: 'SystemAssigned'
