@@ -8,7 +8,7 @@ param tags object = {}
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')
 
 // Create a host pool for AVD
-resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-09-03-preview' = {
+resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-01-14-preview' = {
   name: replace(baseName, '{rtype}', 'hp')
   location: location
   properties: {
