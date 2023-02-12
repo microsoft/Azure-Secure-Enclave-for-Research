@@ -61,7 +61,6 @@ var computeSubnetName = 'compute'
 
 // Subnet configuration for building a new virtual network for research workspace
 // WATCH OUT: the Bicep items() function will sort the subnets alphabetically by the key
-// TODO: To avoid this issues, do not create this as a dictionary, but as an array instead
 var workspaceSubnets = {
   '10_${privateEndpointSubnetName}': {
     name: privateEndpointSubnetName
@@ -110,6 +109,7 @@ var workspacePepSubnetNsgRules = []
 
 // The Network Security Group rules must be specified 
 // in the alphabetical order of the subnet dictionary object's keys
+// TODO: Integrate in the definition of the subnets (per https://github.com/SvenAelterman/Bicep-VNetModule)
 var workspaceNsgRules = [
   workspacePepSubnetNsgRules
   workspaceComputeSubnetNsgRules
