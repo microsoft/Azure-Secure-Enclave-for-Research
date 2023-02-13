@@ -10,6 +10,8 @@ This solution was created in collaboration with the University of Pittsburgh.
 
 ![SRE Architecture Diagram](docs/diagram/AzureSecureEnclaveForResearch.png)
 
+*Download a [Visio file](docs/diagram/AzureSecureEnclaveForResearch.vsdx) of this architecture.*
+
 **Important:**  *The Azure Secure Enclave for Research is not a substitute for good security practices. It is only a set of tools and processes which help you maintain a secure environment. Please read this repo's Wiki for instructions on how the environment is intended to function and how to manage security for both users and data properly.*
 
 ## Deploying the Secure Enclave
