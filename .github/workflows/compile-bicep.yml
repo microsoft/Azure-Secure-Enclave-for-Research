@@ -40,7 +40,7 @@ jobs:
           bicep build Bicep/root_modules/main.bicep --outfile arm_templates/azuredeploy.json
 
       - name: Commit compiled ARM template
-        uses: EndBug/add-and-commit@v9.0.1
+        uses: EndBug/add-and-commit@v9.1.1
         with:
           author_name: github-actions
           author_email: "17446043+SvenAelterman@users.noreply.github.com"
