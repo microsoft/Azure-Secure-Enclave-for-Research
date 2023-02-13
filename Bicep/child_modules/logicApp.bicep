@@ -18,29 +18,35 @@ resource adf 'Microsoft.DataFactory/factories@2018-06-01' existing = {
   name: adfName
 }
 
-resource adfConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+resource adfConnection 'Microsoft.Web/connections@2016-06-01' = {
   name: 'api-${adfName}'
   location: location
+  // kind is a valid property
+  #disable-next-line BCP187
   kind: 'V1'
   properties: {
     displayName: adfName
     api: {
       id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azuredatafactory')
     }
-    parameterValueType: 'Alternative'
+    //parameterValueType: 'Alternative'
   }
   tags: tags
 }
 
-resource stgConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+resource stgConnection 'Microsoft.Web/connections@2016-06-01' = {
   name: 'api-${storageAcctName}'
   location: location
+  // kind is a valid property
+  #disable-next-line BCP187
   kind: 'V1'
   properties: {
     displayName: storageAcctName
     api: {
       id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azureblob')
     }
+    // This appears to be valid and working to set the authentication property for this connection
+    #disable-next-line BCP089
     parameterValueSet: {
       name: 'managedIdentityAuth'
       value: {}
@@ -49,9 +55,11 @@ resource stgConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
   tags: tags
 }
 
-resource emailConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+resource emailConnection 'Microsoft.Web/connections@2016-06-01' = {
   name: 'api-office365'
   location: location
+  // kind is a valid property
+  #disable-next-line BCP187
   kind: 'V1'
   properties: {
     displayName: 'office365'
@@ -125,7 +133,7 @@ resource logicApp 'Microsoft.Logic/workflows@2019-05-01' = {
 }
 
 // set rbac on adf for logicApp
-resource logicAppAdfRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource logicAppAdfRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('rbac-${adf.name}-adf')
   scope: adf
   properties: {
@@ -136,7 +144,7 @@ resource logicAppAdfRole 'Microsoft.Authorization/roleAssignments@2020-10-01-pre
 }
 
 // set rbac on stg account for LogicApp
-resource logicAppPrivateStgRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource logicAppPrivateStgRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('rbac-${storageAcct.name}-logicapp')
   scope: storageAcct
   properties: {

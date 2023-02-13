@@ -8,7 +8,7 @@ param tags object = {}
 var baseName = !empty(subwloadname) ? replace(namingStructure, '{subwloadname}', subwloadname) : replace(namingStructure, '-{subwloadname}', '')
 
 // Create a host pool for AVD
-resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-09-03-preview' = {
+resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2019-12-10-preview' = {
   name: replace(baseName, '{rtype}', 'hp')
   location: location
   properties: {
@@ -17,6 +17,7 @@ resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2021-09-03-preview'
     preferredAppGroupType: 'RailApplications'
     customRdpProperty: 'drivestoredirect:s:0;audiomode:i:0;videoplaybackmode:i:1;redirectclipboard:i:0;redirectprinters:i:0;devicestoredirect:s:0;redirectcomports:i:0;redirectsmartcards:i:1;usbdevicestoredirect:s:0;enablecredsspsupport:i:1;use multimon:i:1;targetisaadjoined:i:1;'
     friendlyName: '${environment} Research Enclave Access'
+    #disable-next-line BCP037
     startVMOnConnect: true
     registrationInfo: {
       registrationTokenOperation: 'Update'
