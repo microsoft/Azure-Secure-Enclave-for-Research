@@ -45,6 +45,8 @@ resource stgConnection 'Microsoft.Web/connections@2016-06-01' = {
     api: {
       id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azureblob')
     }
+    // This appears to be valid and working to set the authentication property for this connection
+    #disable-next-line BCP089
     parameterValueSet: {
       name: 'managedIdentityAuth'
       value: {}
