@@ -91,7 +91,8 @@ resource privatelink_blob_core_windows_net 'Microsoft.Network/privateDnsZones@20
 
 // Create the default group in the DNS zone
 resource privateEndpointDNSGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = if (privatize) {
-  name: '${privateEndpoint.name}/default'
+  name: 'default'
+  parent: privateEndpoint
   properties: {
     privateDnsZoneConfigs: [
       {
@@ -106,7 +107,8 @@ resource privateEndpointDNSGroup 'Microsoft.Network/privateEndpoints/privateDnsZ
 
 // Link the project's virtual network to the new DNS zone
 resource privatelink_blob_core_windows_net_virtualNetworkId 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2018-09-01' = if (privatize) {
-  name: '${endpoint}/${uniqueString(vnetId)}'
+  name: uniqueString(vnetId)
+  parent: privatelink_blob_core_windows_net
   location: 'global'
   properties: {
     virtualNetwork: {
@@ -114,9 +116,6 @@ resource privatelink_blob_core_windows_net_virtualNetworkId 'Microsoft.Network/p
     }
     registrationEnabled: false
   }
-  dependsOn: [
-    privatelink_blob_core_windows_net
-  ]
 }
 
 // Assign the 'Storage Blob Data Contributor' RBAC role to principalId if sent to this module

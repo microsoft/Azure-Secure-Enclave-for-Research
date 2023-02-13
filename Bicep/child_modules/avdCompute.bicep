@@ -32,6 +32,8 @@ resource availabilitySet 'Microsoft.Compute/availabilitySets@2021-11-01' = {
 
 // Deploy the session host VMs just like the Add VM to hostpool process would
 resource vmDeployment 'Microsoft.Resources/deployments@2021-04-01' = {
+  // Accept that the resource deployment names are not stable
+  #disable-next-line use-stable-resource-identifiers
   name: replace(deploymentNameStructure, '{rtype}', 'avdvm')
   properties: {
     mode: 'Incremental'
