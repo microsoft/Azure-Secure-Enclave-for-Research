@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.12.40.16777",
-      "templateHash": "14267061255652845800"
+      "version": "0.14.6.61914",
+      "templateHash": "6277527184870534338"
     }
   },
   "parameters": {
@@ -41,7 +41,7 @@
       "defaultValue": {}
     },
     "vmAdministratorAccountPassword": {
-      "type": "secureString"
+      "type": "securestring"
     },
     "avdAccess": {
       "type": "bool",
@@ -203,9 +203,7 @@
           "location": {
             "value": "[parameters('location')]"
           },
-          "tags": {
-            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
-          }
+          "tags": "[if(empty(parameters('tags')), createObject('value', createObject()), if(empty(parameters('tags').Core), createObject('value', createObject()), createObject('value', parameters('tags').Core)))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -213,8 +211,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.12.40.16777",
-              "templateHash": "5225950857257498521"
+              "version": "0.14.6.61914",
+              "templateHash": "7003218255220037449"
             }
           },
           "parameters": {
@@ -293,9 +291,7 @@
           "hubVirtualNetworkId": {
             "value": "[parameters('hubVirtualNetworkId')]"
           },
-          "tags": {
-            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
-          },
+          "tags": "[if(empty(parameters('tags')), createObject('value', createObject()), if(empty(parameters('tags').Core), createObject('value', createObject()), createObject('value', parameters('tags').Core)))]",
           "nsgSecurityRules": {
             "value": "[variables('workspaceNsgRules')]"
           }
@@ -306,8 +302,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.12.40.16777",
-              "templateHash": "2432897757841592943"
+              "version": "0.14.6.61914",
+              "templateHash": "649158281422805621"
             }
           },
           "parameters": {
@@ -454,8 +450,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "15341025273867245236"
+                      "version": "0.14.6.61914",
+                      "templateHash": "11977581395608130605"
                     }
                   },
                   "parameters": {
@@ -557,18 +553,12 @@
               "[variables('containerNames').exportPendingContainerName]"
             ]
           },
-          "vnetId": {
-            "value": "[if(empty(parameters('virtualNetwork')), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'net')), '2020-10-01').outputs.vNetId.value, parameters('virtualNetwork').id)]"
-          },
-          "subnetId": {
-            "value": "[if(empty(parameters('virtualNetwork')), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'net')), '2020-10-01').outputs.subnetIds.value[0], parameters('existingPrivateEndpointSubnetId'))]"
-          },
+          "vnetId": "[if(empty(parameters('virtualNetwork')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'net')), '2020-10-01').outputs.vNetId.value), createObject('value', parameters('virtualNetwork').id))]",
+          "subnetId": "[if(empty(parameters('virtualNetwork')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'network'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'net')), '2020-10-01').outputs.subnetIds.value[0]), createObject('value', parameters('existingPrivateEndpointSubnetId')))]",
           "privatize": {
             "value": true
           },
-          "tags": {
-            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags').Core), createObject(), parameters('tags').Core))]"
-          }
+          "tags": "[if(empty(parameters('tags')), createObject('value', createObject()), if(empty(parameters('tags').Core), createObject('value', createObject()), createObject('value', parameters('tags').Core)))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -576,8 +566,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.12.40.16777",
-              "templateHash": "17488785291829235492"
+              "version": "0.14.6.61914",
+              "templateHash": "13798841483669458415"
             }
           },
           "parameters": {
@@ -750,11 +740,11 @@
               ]
             },
             {
-              "condition": "[variables('assignRole')]",
               "copy": {
                 "name": "rbacAssignment",
                 "count": "[length(parameters('principalIds'))]"
               },
+              "condition": "[variables('assignRole')]",
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-10-01-preview",
               "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('st{0}', variables('stgNameClean')))]",
@@ -815,21 +805,15 @@
           "pipelineName": {
             "value": "[parameters('pipelineName')]"
           },
-          "privateStorageAccountName": {
-            "value": "[if(empty(parameters('privateStorage')), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'stg-pri')), '2020-10-01').outputs.storageAccountName.value, parameters('privateStorage').name)]"
-          },
-          "privateStorageAccountRG": {
-            "value": "[if(empty(parameters('privateStorage')), replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg'), split(parameters('privateStorage').id, '/')[3])]"
-          },
+          "privateStorageAccountName": "[if(empty(parameters('privateStorage')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg')), 'Microsoft.Resources/deployments', replace(variables('deploymentNameStructure'), '{rtype}', 'stg-pri')), '2020-10-01').outputs.storageAccountName.value), createObject('value', parameters('privateStorage').name))]",
+          "privateStorageAccountRG": "[if(empty(parameters('privateStorage')), createObject('value', replace(replace(variables('namingStructure'), '{subwloadname}', 'storage'), '{rtype}', 'rg')), createObject('value', split(parameters('privateStorage').id, '/')[3]))]",
           "approverEmail": {
             "value": "[parameters('approverEmail')]"
           },
           "userAssignedManagedIdentity": {
             "value": "[parameters('userAssignedManagedIdentity')]"
           },
-          "tags": {
-            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags')['Data Automation']), createObject(), parameters('tags')['Data Automation']))]"
-          }
+          "tags": "[if(empty(parameters('tags')), createObject('value', createObject()), if(empty(parameters('tags')['Data Automation']), createObject('value', createObject()), createObject('value', parameters('tags')['Data Automation'])))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
@@ -837,8 +821,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.12.40.16777",
-              "templateHash": "1787857324022423758"
+              "version": "0.14.6.61914",
+              "templateHash": "4859274525037467791"
             }
           },
           "parameters": {
@@ -919,8 +903,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "7824501708591254263"
+                      "version": "0.14.6.61914",
+                      "templateHash": "16254112146756083765"
                     }
                   },
                   "parameters": {
@@ -1006,9 +990,7 @@
                   "pipelineName": {
                     "value": "[parameters('pipelineName')]"
                   },
-                  "userAssignedIdentityId": {
-                    "value": "[if(not(empty(parameters('userAssignedManagedIdentity'))), parameters('userAssignedManagedIdentity').id, reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('privateStorageAccountRG')), 'Microsoft.Resources/deployments', replace(parameters('deploymentNameStructure'), '{rtype}', 'uami')), '2020-10-01').outputs.managedIdentityId.value)]"
-                  },
+                  "userAssignedIdentityId": "[if(not(empty(parameters('userAssignedManagedIdentity'))), createObject('value', parameters('userAssignedManagedIdentity').id), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('privateStorageAccountRG')), 'Microsoft.Resources/deployments', replace(parameters('deploymentNameStructure'), '{rtype}', 'uami')), '2020-10-01').outputs.managedIdentityId.value))]",
                   "tags": {
                     "value": "[parameters('tags')]"
                   }
@@ -1019,8 +1001,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "8906974087413547986"
+                      "version": "0.14.6.61914",
+                      "templateHash": "14039299625348818876"
                     }
                   },
                   "parameters": {
@@ -1249,8 +1231,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.12.40.16777",
-                              "templateHash": "13675627002639377287"
+                              "version": "0.14.6.61914",
+                              "templateHash": "7737591902023734053"
                             }
                           },
                           "parameters": {
@@ -1376,8 +1358,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "16386612684676899318"
+                      "version": "0.14.6.61914",
+                      "templateHash": "5116343573883770614"
                     }
                   },
                   "parameters": {
@@ -1605,8 +1587,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "17488785291829235492"
+                      "version": "0.14.6.61914",
+                      "templateHash": "13798841483669458415"
                     }
                   },
                   "parameters": {
@@ -1779,11 +1761,11 @@
                       ]
                     },
                     {
-                      "condition": "[variables('assignRole')]",
                       "copy": {
                         "name": "rbacAssignment",
                         "count": "[length(parameters('principalIds'))]"
                       },
+                      "condition": "[variables('assignRole')]",
                       "type": "Microsoft.Authorization/roleAssignments",
                       "apiVersion": "2020-10-01-preview",
                       "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('st{0}', variables('stgNameClean')))]",
@@ -1850,8 +1832,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "12661608489856770554"
+                      "version": "0.14.6.61914",
+                      "templateHash": "3835423054527686672"
                     }
                   },
                   "parameters": {
@@ -1940,8 +1922,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "12661608489856770554"
+                      "version": "0.14.6.61914",
+                      "templateHash": "3835423054527686672"
                     }
                   },
                   "parameters": {
@@ -2033,8 +2015,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "2328787128051601742"
+                      "version": "0.14.6.61914",
+                      "templateHash": "17097449600403306949"
                     }
                   },
                   "parameters": {
@@ -2150,8 +2132,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "2328787128051601742"
+                      "version": "0.14.6.61914",
+                      "templateHash": "17097449600403306949"
                     }
                   },
                   "parameters": {
@@ -2255,8 +2237,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "16337150881923008241"
+                      "version": "0.14.6.61914",
+                      "templateHash": "5750509427133327531"
                     }
                   },
                   "parameters": {
@@ -2323,9 +2305,7 @@
                   "scriptContent": {
                     "value": "\r\n          param(\r\n            [string] [Parameter(Mandatory=$true)] $ResourceGroupName,\r\n            [string] [Parameter(Mandatory=$true)] $azureDataFactoryName,\r\n            [string] [Parameter(Mandatory=$true)] $privateLinkResourceId\r\n          )\r\n\r\n          Connect-AzAccount -Identity\r\n\r\n          # Start Triggers\r\n          Get-AzDataFactoryV2Trigger -DataFactoryName $azureDataFactoryName -ResourceGroupName $ResourceGroupName | Start-AzDataFactoryV2Trigger -Force | Out-Null\r\n\r\n          # Approve DFS private endpoint\r\n          foreach ($privateLinkConnection in (Get-AzPrivateEndpointConnection -PrivateLinkResourceId $privateLinkResourceId)) { if ($privateLinkConnection.PrivateLinkServiceConnectionState.Status -eq \"Pending\") { Approve-AzPrivateEndpointConnection -ResourceId $privateLinkConnection.id } }\r\n        "
                   },
-                  "userAssignedIdentityId": {
-                    "value": "[if(not(empty(parameters('userAssignedManagedIdentity'))), parameters('userAssignedManagedIdentity').id, reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('privateStorageAccountRG')), 'Microsoft.Resources/deployments', replace(parameters('deploymentNameStructure'), '{rtype}', 'uami')), '2020-10-01').outputs.managedIdentityId.value)]"
-                  },
+                  "userAssignedIdentityId": "[if(not(empty(parameters('userAssignedManagedIdentity'))), createObject('value', parameters('userAssignedManagedIdentity').id), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('privateStorageAccountRG')), 'Microsoft.Resources/deployments', replace(parameters('deploymentNameStructure'), '{rtype}', 'uami')), '2020-10-01').outputs.managedIdentityId.value))]",
                   "tags": {
                     "value": "[parameters('tags')]"
                   }
@@ -2336,8 +2316,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "13675627002639377287"
+                      "version": "0.14.6.61914",
+                      "templateHash": "7737591902023734053"
                     }
                   },
                   "parameters": {
@@ -2452,9 +2432,7 @@
           "rdshPrefix": {
             "value": "rdsh"
           },
-          "tags": {
-            "value": "[if(empty(parameters('tags')), createObject(), if(empty(parameters('tags')['Remote Access']), createObject(), parameters('tags')['Remote Access']))]"
-          },
+          "tags": "[if(empty(parameters('tags')), createObject('value', createObject()), if(empty(parameters('tags')['Remote Access']), createObject('value', createObject()), createObject('value', parameters('tags')['Remote Access'])))]",
           "vmAdministratorAccountPassword": {
             "value": "[parameters('vmAdministratorAccountPassword')]"
           }
@@ -2465,8 +2443,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.12.40.16777",
-              "templateHash": "8330076420797577077"
+              "version": "0.14.6.61914",
+              "templateHash": "6749738487997115882"
             }
           },
           "parameters": {
@@ -2495,7 +2473,7 @@
               "type": "object"
             },
             "vmAdministratorAccountPassword": {
-              "type": "secureString"
+              "type": "securestring"
             },
             "subwloadname": {
               "type": "string",
@@ -2552,8 +2530,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "15559873021598666802"
+                      "version": "0.14.6.61914",
+                      "templateHash": "5619802551673352242"
                     }
                   },
                   "parameters": {
@@ -2700,8 +2678,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "2432897757841592943"
+                      "version": "0.14.6.61914",
+                      "templateHash": "649158281422805621"
                     }
                   },
                   "parameters": {
@@ -2848,8 +2826,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.12.40.16777",
-                              "templateHash": "15341025273867245236"
+                              "version": "0.14.6.61914",
+                              "templateHash": "11977581395608130605"
                             }
                           },
                           "parameters": {
@@ -2972,8 +2950,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "5587763555966577518"
+                      "version": "0.14.6.61914",
+                      "templateHash": "9356179298704171564"
                     }
                   },
                   "parameters": {
@@ -3043,8 +3021,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.12.40.16777",
-                              "templateHash": "15341025273867245236"
+                              "version": "0.14.6.61914",
+                              "templateHash": "11977581395608130605"
                             }
                           },
                           "parameters": {
@@ -3117,8 +3095,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.12.40.16777",
-                              "templateHash": "15341025273867245236"
+                              "version": "0.14.6.61914",
+                              "templateHash": "11977581395608130605"
                             }
                           },
                           "parameters": {
@@ -3217,8 +3195,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.12.40.16777",
-                      "templateHash": "5036324966889353797"
+                      "version": "0.14.6.61914",
+                      "templateHash": "6604841016275810721"
                     }
                   },
                   "parameters": {
@@ -3241,7 +3219,7 @@
                       "type": "string"
                     },
                     "vmAdministratorAccountPassword": {
-                      "type": "secureString"
+                      "type": "securestring"
                     },
                     "vmCount": {
                       "type": "int",
