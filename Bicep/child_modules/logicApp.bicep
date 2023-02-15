@@ -29,7 +29,9 @@ resource adfConnection 'Microsoft.Web/connections@2016-06-01' = {
     api: {
       id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'azuredatafactory')
     }
-    //parameterValueType: 'Alternative'
+    // parameterValueType is required to support use of Managed Identity for this connector
+    #disable-next-line BCP037
+    parameterValueType: 'Alternative'
   }
   tags: tags
 }
@@ -132,7 +134,7 @@ resource logicApp 'Microsoft.Logic/workflows@2019-05-01' = {
   tags: tags
 }
 
-// set rbac on adf for logicApp
+// Set RBAC on ADf for the Logic App so it can trigger pipeline runs
 resource logicAppAdfRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('rbac-${adf.name}-adf')
   scope: adf
@@ -143,7 +145,7 @@ resource logicAppAdfRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
   }
 }
 
-// set rbac on stg account for LogicApp
+// Set RBAC on the Storage Account for the Logic App so it can receive storage events
 resource logicAppPrivateStgRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('rbac-${storageAcct.name}-logicapp')
   scope: storageAcct
