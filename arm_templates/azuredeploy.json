@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.14.6.61914",
-      "templateHash": "14922079802747901888"
+      "templateHash": "2817038671183604635"
     }
   },
   "parameters": {
@@ -822,7 +822,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.14.6.61914",
-              "templateHash": "12464931314338766963"
+              "templateHash": "15183347617803541381"
             }
           },
           "parameters": {
@@ -1359,7 +1359,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.14.6.61914",
-                      "templateHash": "7776964203795818468"
+                      "templateHash": "11594093649433352021"
                     }
                   },
                   "parameters": {
@@ -1405,7 +1405,8 @@
                         "displayName": "[parameters('adfName')]",
                         "api": {
                           "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('location'), 'azuredatafactory')]"
-                        }
+                        },
+                        "parameterValueType": "Alternative"
                       },
                       "tags": "[parameters('tags')]"
                     },
